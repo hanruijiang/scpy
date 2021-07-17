@@ -93,9 +93,10 @@ def predict(x: torch.Tensor, params, linear=False, tensor=True):
 def hessian_inv(H: torch.Tensor):
     # TODO
     try:
-      eigvals, eigvecs = torch.linalg.eigh(H.cpu())
-      Hinv = torch.matmul(torch.matmul(eigvecs, torch.diag(1.0 / eigvals)), eigvecs.T).to(H.device)
-      return (Hinv + Hinv.T) / 2.0
+      return torch.linalg.pinv(H.cpu()).to(H.device)
+#       eigvals, eigvecs = torch.linalg.eigh(H.cpu())
+#       Hinv = torch.matmul(torch.matmul(eigvecs, torch.diag(1.0 / eigvals)), eigvecs.T).to(H.device)
+#       return (Hinv + Hinv.T) / 2.0
     except:
       return torch.ones_like(H) * float('Inf')
   
