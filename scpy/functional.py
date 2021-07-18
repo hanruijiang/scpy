@@ -4,11 +4,9 @@ import pandas as pd
 
 from statsmodels.base.optimizer import Optimizer
 
-import patsy
 from tqdm import tqdm
 
 from typing import Any, Callable, Iterable, Optional
-
 
 from .functions import *
 
@@ -84,7 +82,7 @@ def _family(family: str):
     else:
         raise(ValueError(family))
   
-def _parallel(x, Y, family, device, xname, yname, disp, kwargs):
+def _parallel(X, Y, family, device, xname, yname, disp, kwargs):
   
     if type(Y) == dict:
       client, offset = Y['data'], Y['offset']
@@ -93,7 +91,7 @@ def _parallel(x, Y, family, device, xname, yname, disp, kwargs):
           return client.recv()
       Y = dataloader(loader, length=Y['length'])
       
-    return fit_batch(x, Y, family, device, xname, yname, disp, **kwargs)
+    return fit_batch(X, Y, family, device, xname, yname, disp, **kwargs)
   
   
 # functions  
@@ -215,26 +213,19 @@ def fit_batch(X, Y, family: str, device=None, xnames=None, yname=None, disp=True
     if xnames is None:
         xnames = dict.fromkeys(range(len(X)), None)
     else:
-        assert len(X) == len(xnames), 'The number of X is different from xnames: {} != {}'.format(len(X), len(xnames))
+        assert len(X) == len(xnames), 'The batch size of X is different from xnames: {} != {}'.format(len(X), len(xnames))
         
     if yname is None:
         yname = range(len(Y))
     else:
         assert len(Y) == len(yname), 'The batch size of Y is different from yname: {} != {}'.format(len(Y), len(yname))
-        
-    Xs = list()
-    for x in X:
-        device, x = _tensors(device, x)
-        Xs.append(x)
-    
-    assert x.dim() == 2, 'x should be 2-dimensional: {}'.format(x.shape)
     
     results = list()
     for target, y in zip(tqdm(yname, disable=(not disp)), Y):
       
-        for (group, xname), x in zip(xnames, Xs):
+        for (group, xname), x in zip(xnames, X):
 
-            _, y = _tensors(device, y=y)
+            device, x, y = _tensors(device, x, y)
 
             params, bse, statistic, pvalues = f(x, y, **kwargs)
 

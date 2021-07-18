@@ -7,7 +7,6 @@
 ## requirements
 
 - pandas
-- numpy
 - statsmodels
 - torch
 
@@ -18,21 +17,34 @@
 ```python
 import scpy
 
-scpy.fit(x, y, family='poisson', device='cpu')
+scpy.fit(x, y, family='poisson', device='cpu', **kwargs)
 
-scpy.fit_batch(X, Y, family='negative_binomial', device='cpu')
+scpy.fit_batch(X, Y, family='negative_binomial', device='cpu', **kwargs)
 
 ```
+Support specifying *method*, *maxiter* and other parameters in [statsmodels optimizers](https://www.statsmodels.org/stable/optimization.html)
 
-### fit parallel
+### parallel
 
 ```bash
 python -m scpy demo.py demo.csv -d 0,1,2,3,4,5,6,7
 ```
+>*demo.py*
+>```python
+args = {
+  'X': X,
+  'Y': Y,
+  'family': 'negative_binomial',
+  'xnames': xnames,
+  'yname': yname,
+  'kwargs': {}
+}
+>```
 
 ## todo
 
 - [ ] Currently only supports 'poisson' and 'negative_binomial', add more distributions.
+- [ ] Fix bug on Hessian matrix inversion.
 
 
 

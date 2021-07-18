@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -13,12 +11,6 @@ import scipy as sp
 
 base = '/home/jjpeng/data/yxlong/CRISPR/source/30849375/GEO/'
 
-## load experiment info
-
-grnas = pd.read_csv(base + 'GSE120861_grna_groups.at_scale.txt.gz', sep = '\t', header=None)[1]
-cells = pd.read_csv(base + 'GSE120861_at_scale_screen.cells.txt.gz', sep = '\t', header=None)[0]
-genes = pd.read_csv(base + 'GSE120861_at_scale_screen.genes.txt.gz', sep = '\t', header=None)[0]
-
 ## load cell phenotypes
 
 phenoData = pd.read_csv(base + 'GSE120861_at_scale_screen.phenoData.txt.gz', sep=' ', header=None, usecols=[0,1,2,3,5,7,8,9,10,14,17])
@@ -29,6 +21,9 @@ phenoData['guide_count'].fillna(0, inplace=True)
 phenoData['prep_batch'] = phenoData.eval('prep_batch != "prep_batch_1"').astype(int)
 
 ## parse & save 10X expression matrix
+
+cells = pd.read_csv(base + 'GSE120861_at_scale_screen.cells.txt.gz', sep = '\t', header=None)[0]
+genes = pd.read_csv(base + 'GSE120861_at_scale_screen.genes.txt.gz', sep = '\t', header=None)[0]
 
 # mtx = pd.read_csv(base + 'GSE120861_at_scale_screen.exprs.mtx.gz', sep = ' ', header=None, skiprows=2, compression=None)
 # coo = sp.sparse.coo_matrix((mtx[2], (mtx[0] - 1, mtx[1] - 1)), shape=(genes.shape[0], cells.shape[0]), dtype=np.int16)
@@ -74,7 +69,8 @@ args = {
   'Y': {'data': loader, 'length': exprs.shape[1]},
   'family': 'negative_binomial',
   'xnames': xnames,
-  'yname': exprs.columns
+  'yname': exprs.columns,
+  'kwargs': {}
 }
 
 
@@ -82,7 +78,9 @@ if __name__ == '__main__':
   
     import scpy
     
-    summaries = scpy.fit_batch(disp=True, **args)
+    args['Y'] = scpy.dataloader(**args['Y'])
+    
+    summaries = scpy.fit_batch(device='cpu', disp=True, **args)
     
     print(summaries)
   
