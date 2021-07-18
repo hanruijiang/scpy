@@ -31,20 +31,20 @@ python -m scpy demo.py demo.csv -d 0,1,2,3,4,5,6,7
 ```
 >*demo.py*
 >```python
-args = {
-  'X': X,
-  'Y': Y,
-  'family': 'negative_binomial',
-  'xnames': xnames,
-  'yname': yname,
-  'kwargs': {}
-}
+>args = {
+>  'X': X,
+>  'Y': Y,
+>  'family': 'negative_binomial',
+>  'xnames': xnames,
+>  'yname': yname,
+>  'kwargs': {}
+>}
 >```
 
 ## todo
 
 - [ ] Currently only supports 'poisson' and 'negative_binomial', add more distributions.
 - [ ] Fix bug on Hessian matrix inversion.
-
+- [ ] Automatically cache x and y in fit_batch.
 
 
